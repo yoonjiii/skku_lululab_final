@@ -12,22 +12,27 @@ import pytest
 import difflib
 from functools import reduce
 import numpy as np
-import openpyxl
-
+from flask import Flask, request, render_template
+from flask import Flask
 from collections import OrderedDict
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "lululab-ocr-project-f5c818d3f842.json"
+from werkzeug.serving import WSGIRequestHandler
+WSGIRequestHandler.protocol_version = "HTTP/1.1"
+
+path = "lululab-ocr-b3ae0ebfee0d.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
 app=Flask(__name__)
 @app.route('/', methods=['GET','POST'], strict_slashes=False)
 def home():
     if request.method == 'POST':
+        print("Hi")
         print(request.is_json)
         params = request.get_json()
-        img_string = base64.b64decode(params['image'])
+        imgdata = base64.b64decode(params['image'])
         lan = params['language']
+        option = params['option']
 
         filename = 'decoded_image.jpg'
-        imgdata = base64.b64decode(img_string)
         with open(filename, 'wb') as f:
             f.write(imgdata)
 
@@ -42,9 +47,21 @@ def home():
         response = client.text_detection(image=image)
         result = response.text_annotations
 
+        texts = ""
         texts = result[0].description
         texts = texts.replace("\n", "")
+        print(texts)
 
+        """
+        # Option is "name"
+        if option == '1':
+            filename = 'cosmetic_DB'
+            df = pd.read_excel(filename, engine='openpyxl')
+            ls = list(df['name'])
+            ls = list(map(str, ls))
+            if(df['name'] == texts).any(): 
+        """
+        
         #Language = English
         if lan == '1':
             print("language is english")
@@ -115,40 +132,45 @@ def home():
 
                             # print(l,c_m,i)
                             if c_m != []:
-                                list_tmp = df[df['lower'] == next_[0]][['eng_name']].values.tolist()
+                                list_tmp = df[df['lower'] == c_m[0]][['eng_name']].values.tolist()
                                 str_tmp = list_tmp[0][0]  # name of the ingredient
                                 output_class.append(str_tmp)
-                                list_tmp = df[df['lower'] == next_[0]][['purpose']].values.tolist()
+                                list_tmp = df[df['lower'] == c_m[0]][['purpose']].values.tolist()
                                 str_tmp = list_tmp[0][0]  # purpose of the ingredient
                                 output_purpose.append(str_tmp)
                         i += 1
                     else:
                         # print(word,close_matches,i)
                         if close_matches != []:
-                            list_tmp = df[df['lower'] == next_[0]][['eng_name']].values.tolist()
+                            list_tmp = df[df['lower'] == close_matches[0]][['eng_name']].values.tolist()
                             str_tmp = list_tmp[0][0]  # name of the ingredient
                             output_class.append(str_tmp)
-                            list_tmp = df[df['lower'] == next_[0]][['purpose']].values.tolist()
+                            list_tmp = df[df['lower'] == close_matches[0]][['purpose']].values.tolist()
                             str_tmp = list_tmp[0][0]  # purpose of the ingredient
                             output_purpose.append(str_tmp)
                         i += 1
                 else:
                     # print(word,close_matches)
                     if close_matches != []:
-                        list_tmp = df[df['lower'] == next_[0]][['eng_name']].values.tolist()
+                        list_tmp = df[df['lower'] == close_matches[0]][['eng_name']].values.tolist()
                         str_tmp = list_tmp[0][0]  # name of the ingredient
                         output_class.append(str_tmp)
-                        list_tmp = df[df['lower'] == next_[0]][['purpose']].values.tolist()
+                        list_tmp = df[df['lower'] == close_matches[0]][['purpose']].values.tolist()
                         str_tmp = list_tmp[0][0]  # purpose of the ingredient
                         output_purpose.append(str_tmp)
                     i += 1
             output_final_class = []
             [output_final_class.append(x) for x in output_class if x not in output_final_class]
             output_final_purpose = []
-            [output_final_purpose.append(x) for x in output_class if x not in output_final_purpose]
+            [output_final_purpose.append(x) for x in output_purpose if x not in output_final_purpose]
+
+            print(output_final_class)
+            print(output_final_purpose)
 
             i = 0;
             length = len(output_class)
+            print("length is ")
+            print(length)
             output = "["
             #[{"class":"AAA","purpose":"aaaaa"},{"class":"BBB","purpose":"bbbbb"}]
             while True :
@@ -158,8 +180,7 @@ def home():
                 if i == length-1:
                     output = output + ']'
                     break
-            print(output)
-
+                i = i+1
 
         elif lan == '2':
             print("language is korean")
@@ -203,7 +224,7 @@ def home():
                 differ = difflib.SequenceMatcher(None, L1, L2)
                 return differ.ratio()
 
-            filename = '/content/ingre_kor.xlsx'
+            filename = 'ingre_kor.xlsx'
             di = pd.read_excel(filename, engine='openpyxl')
 
             ls = list(di['kor_name'])
@@ -426,7 +447,7 @@ def home():
                     continue
 
                 if x not in output_final_:
-                    output_final_.append(x)
+                    ioutput_final_.append(x)
                     purpose = di[di['kor_name'] == x]['purpose'].values.tolist()[0]
                     output_purpose_.append(purpose)
             i = 0;
@@ -440,11 +461,11 @@ def home():
                 if i == length - 1:
                     output = output + "]"
                     break
-            print(output)
 
+        print(output)
         return output
     else:
         return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='1.0.0.0', port=16001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
