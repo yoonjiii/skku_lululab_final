@@ -21,6 +21,8 @@ WSGIRequestHandler.protocol_version = "HTTP/1.1"
 path = "lululab-ocr-b3ae0ebfee0d.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
 
+
+#final
 app=Flask(__name__)
 @app.route('/', methods=['GET','POST'], strict_slashes=False)
 def home():
@@ -28,7 +30,6 @@ def home():
         print(request.is_json)
         params = request.get_json()
         imgdata = base64.b64decode(params['image'])
-        lan = params['language']
         option = params['option']
 
         filename = 'decoded_image.jpg'
@@ -89,8 +90,9 @@ def home():
             else :
                 message = "no data"
                 return message
-        
 
+
+        lan = params['language']
         #Language = English
         if lan == '1':
             print("language is english")
