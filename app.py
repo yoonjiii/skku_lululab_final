@@ -25,7 +25,6 @@ app=Flask(__name__)
 @app.route('/', methods=['GET','POST'], strict_slashes=False)
 def home():
     if request.method == 'POST':
-        print("Hi")
         print(request.is_json)
         params = request.get_json()
         imgdata = base64.b64decode(params['image'])
@@ -49,19 +48,49 @@ def home():
 
         texts = ""
         texts = result[0].description
-        texts = texts.replace("\n", "")
-        print(texts)
 
-        """
+
         # Option is "name"
         if option == '1':
-            filename = 'cosmetic_DB'
+            texts = texts.replace("\n", " ")
+            print(texts)
+
+            output_class = []
+            output_purpose = []
+
+            filename = 'cosmetic_DB.xlsx'
             df = pd.read_excel(filename, engine='openpyxl')
             ls = list(df['name'])
             ls = list(map(str, ls))
-            if(df['name'] == texts).any(): 
-        """
+            if(df['name'] == texts).any():
+                ingredients = df[df['name'] == texts]['ingredient list'].values.tolist()[0]
+                output_class = [ingredients.strip() for ingredients in re.split('[,]', ingredients)]
+                length = len(output_class)
+                for x in output_class:
+                    filename = 'ingre_kor.xlsx'
+                    di = pd.read_excel(filename, engine='openpyxl')
+                    ls = list(di['kor_name'])
+                    ls = list(map(str, ls))
+                    if(di['kor_name'] == x).any():
+                        list_tmp = di[di['kor_name'] == x]['purpose'].values.tolist()[0]
+                        output_purpose.append(list_tmp)
+                i = 0;
+                output = "["
+                while True:
+                    if i != 0:
+                        output = output + ','
+                    output = output + '{"class":"' + output_class[i] + '","purpose":"' + output_purpose[i] + '"}'
+                    if i == length - 1:
+                        output = output + "]"
+                        break
+                    i = i+1
+                print(output)
+                return output
+            else :
+                message = "no data"
+                return message
         
+
         #Language = English
         if lan == '1':
             print("language is english")
@@ -74,6 +103,8 @@ def home():
             output_class = []
             output_purpose = []
 
+            texts = texts.replace("\n", "")
+            print(texts)
             # 괄호 안에 있는 문자열 지우기
             texts = re.sub(r'\([^()]*\)', '', texts)
             # 대괄호 안에 있는 문자열 지우기
@@ -234,6 +265,8 @@ def home():
             sym_spell = KoSymSpell()
             sym_spell.load_dictionary(dictionary_path, 0, 1)
 
+            texts = texts.replace("\n","")
+            print(texts)
             # 괄호 안에 있는 문자열 지우기
             texts = re.sub(r'\([^()]*\)', '', texts)
             # 대괄호 안에 있는 문자열 지우기
@@ -447,7 +480,7 @@ def home():
                     continue
 
                 if x not in output_final_:
-                    ioutput_final_.append(x)
+                    output_final_.append(x)
                     purpose = di[di['kor_name'] == x]['purpose'].values.tolist()[0]
                     output_purpose_.append(purpose)
             i = 0;
@@ -461,6 +494,7 @@ def home():
                 if i == length - 1:
                     output = output + "]"
                     break
+                i = i+1
 
         print(output)
         return output
