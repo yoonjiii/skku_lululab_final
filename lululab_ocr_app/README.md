@@ -7,6 +7,6 @@
    + 화장품 이름으로 검색하는 경우: 이미지에서 인식한 텍스트가 화장품 이름이므로 이를 화장품 데이터베이스에서 찾고, 그 화장품의 성분정보를 알아낸다. 만약 화장품 데이터베이스에 없는 경우 "no data"를 반환하고, 안드로이드 앱에서 성분표로 검색해달라는 문구를 표시한다.
    + 성분표로 검색하는 경우: 언어 정보에 따라 다르게 동작한다. 이미지에서 인식한 텍스트는 화장품의 성분표이며, 이를 후처리 코드를 통해 성분사전과 매칭한다.  
 5. 서버에서 결과를 받는다. String을 JsonArray로 변환하고 파싱한 후, 화면에 ListView를 이용해 표시한다. 리스트에는 성분명, 효능, 위험도를 표기한다.
-<img src="../readme_imgs/readme_img5.png">
+<img src="../readme_imgs/readme_img5.png" width="300"/>
 
-<img src="../readme_imgs/readme_img4.png">
+<img src="../readme_imgs/readme_img4.png" width="500">
