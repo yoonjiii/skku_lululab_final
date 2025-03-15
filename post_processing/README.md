@@ -37,10 +37,3 @@
     한글 성분표에 대한 성분사전 매칭에 사용되는 성분사전입니다.
     기존에 룰루랩에서 제공받은 ingredients.xlsx를 수정했습니다. eng_name 열과 other_name 열을 없앴습니다.
     <img src="../readme_imgs/readme_img3.jpg">
-  
-  + ### lululab-ocr-b3ae0ebfee0d.json 
-    Google cloud vision api를 사용하기 위해 받은 key입니다. 만약 다른 key를 사용한다면 이 파일을 다른 파일로 바꿔준 다음 `app.py`의 21번 줄의 `path`를 수정해주어야 합니다.
-    ```
-    path = "lululab-ocr-b3ae0ebfee0d.json"
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path
-    ```
